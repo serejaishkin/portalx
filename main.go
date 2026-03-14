@@ -2,8 +2,7 @@ package main
 
 import (
     "portalx/core"
-    "log"
-
+    "portalx/profiles"
     "fyne.io/fyne/v2/app"
     "fyne.io/fyne/v2/container"
     "fyne.io/fyne/v2/dialog"

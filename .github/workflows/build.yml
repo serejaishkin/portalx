@@ -1,31 +1,29 @@
 name: Build PortalX Windows EXE
 
-# Триггеры workflow
 on:
   push:
-    branches: [ main ]       # запуск при пуше в main
-  workflow_dispatch:         # ручной запуск вручную через GitHub
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-windows:
-    runs-on: windows-latest   # Windows runner
+    runs-on: windows-latest
 
     steps:
-      # 1️⃣ Клонируем репозиторий
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Настраиваем Go
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
 
-      # 3️⃣ Сборка PortalX.exe
+      - name: Download Go dependencies
+        run: go mod tidy
+
       - name: Build PortalX
         run: go build -o portalx.exe main.go
 
-      # 4️⃣ Загружаем артефакт для скачивания (включая папку bin)
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
