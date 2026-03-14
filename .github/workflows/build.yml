@@ -4,7 +4,7 @@ name: Build PortalX Windows EXE
 on:
   push:
     branches: [ main ]       # запуск при пуше в main
-  workflow_dispatch:         # ручной запуск через GitHub
+  workflow_dispatch:         # ручной запуск вручную через GitHub
 
 jobs:
   build-windows:
@@ -21,26 +21,15 @@ jobs:
         with:
           go-version: '1.21'
 
-      # 3️⃣ Создаём папку bin и копируем бинарники Windows
-      - name: Copy bin files
-        shell: powershell
-        run: |
-          mkdir bin -ErrorAction SilentlyContinue
-          copy bin\sing-box.exe bin\sing-box.exe -Force
-          copy bin\WinDivert64.sys bin\WinDivert64.sys -Force
-          copy bin\windivertctl.exe bin\windivertctl.exe -Force
-
-      # 4️⃣ Сборка PortalX.exe
+      # 3️⃣ Сборка PortalX.exe
       - name: Build PortalX
         run: go build -o portalx.exe main.go
 
-      # 5️⃣ Загружаем артефакт для скачивания
+      # 4️⃣ Загружаем артефакт для скачивания (включая папку bin)
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: portalx-windows
           path: |
             portalx.exe
-            bin/sing-box.exe
-            bin/WinDivert64.sys
-            bin/windivertctl.exe
+            bin/*
