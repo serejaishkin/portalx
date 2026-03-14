@@ -1,11 +1,53 @@
 package main
 
 import (
+	"os/exec"
+	"path/filepath"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
+
+var vpnCmd *exec.Cmd
+
+func startVPN(status *widget.Label) {
+	if vpnCmd != nil {
+		status.SetText("Статус: уже запущено")
+		return
+	}
+
+	// путь к bin/sing-box.exe рядом с portalx.exe
+	singboxPath := filepath.Join("bin", "sing-box.exe")
+
+	vpnCmd = exec.Command(singboxPath, "run", "-c", "config.json")
+
+	err := vpnCmd.Start()
+	if err != nil {
+		status.SetText("Ошибка запуска")
+		vpnCmd = nil
+		return
+	}
+
+	status.SetText("Статус: подключено")
+}
+
+func stopVPN(status *widget.Label) {
+	if vpnCmd == nil {
+		status.SetText("Статус: не запущено")
+		return
+	}
+
+	err := vpnCmd.Process.Kill()
+	if err != nil {
+		status.SetText("Ошибка остановки")
+		return
+	}
+
+	vpnCmd = nil
+	status.SetText("Статус: отключено")
+}
 
 func main() {
 
@@ -13,7 +55,7 @@ func main() {
 	w := a.NewWindow("PortalX")
 
 	linkInput := widget.NewEntry()
-	linkInput.SetPlaceHolder("Вставьте VLESS / VPN ссылку")
+	linkInput.SetPlaceHolder("Вставьте VPN ссылку")
 
 	status := widget.NewLabel("Статус: отключено")
 
@@ -22,11 +64,11 @@ func main() {
 	})
 
 	connectBtn := widget.NewButton("Подключиться", func() {
-		status.SetText("Подключено")
+		startVPN(status)
 	})
 
 	disconnectBtn := widget.NewButton("Отключиться", func() {
-		status.SetText("Отключено")
+		stopVPN(status)
 	})
 
 	content := container.NewVBox(
