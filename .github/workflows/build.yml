@@ -14,25 +14,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Устанавливаем Go
-      - name: Set up Go
+      # 2️⃣ Настраиваем Go
+      - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
 
-      # 3️⃣ Копируем бинарники sing-box.exe и WinDivert64.sys
+      # 3️⃣ Создаём папку bin и копируем бинарники Windows
       - name: Copy bin files
-         run: |
-    mkdir bin /p
-    copy bin\sing-box.exe bin\sing-box.exe
-    copy bin\WinDivert64.sys bin\WinDivert64.sys
-
-      # 4️⃣ Сборка PortalX.exe
-      - name: Build PortalX
+        shell: powershell
         run: |
-          go build -o portalx.exe main.go
+          mkdir bin -ErrorAction SilentlyContinue
+          copy bin\sing-box.exe bin\sing-box.exe
+          copy bin\WinDivert64.sys bin\WinDivert64.sys
+          copy bin\windivertctl.exe bin\windivertctl.exe
 
-      # 5️⃣ Загрузка артефакта для скачивания
+      # 4️⃣ Сборка PortalX.exe через Go
+      - name: Build PortalX
+        run: go build -o portalx.exe main.go
+
+      # 5️⃣ Загружаем артефакт для скачивания
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -41,3 +42,4 @@ jobs:
             portalx.exe
             bin/sing-box.exe
             bin/WinDivert64.sys
+            bin/windivertctl.exe
