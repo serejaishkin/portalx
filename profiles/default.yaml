@@ -1,0 +1,14 @@
+name: "default"
+outbounds:
+  - type: wireguard
+    tag: wg
+    server: "1.2.3.4"
+    server_port: 51820
+  - type: direct
+    tag: direct
+route:
+  rules:
+    - domain_suffix: ["openai.com", "discord.com"]
+      outbound: wg
+    - domain_suffix: ["googlevideo.com"]
+      outbound: direct
