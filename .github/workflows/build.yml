@@ -22,10 +22,10 @@ jobs:
 
       # 3️⃣ Копируем бинарники sing-box.exe и WinDivert64.sys
       - name: Copy bin files
-        run: |
-          mkdir -p bin
-          copy bin\sing-box.exe bin\sing-box.exe
-          copy bin\WinDivert64.sys bin\WinDivert64.sys
+         run: |
+    mkdir bin /p
+    copy bin\sing-box.exe bin\sing-box.exe
+    copy bin\WinDivert64.sys bin\WinDivert64.sys
 
       # 4️⃣ Сборка PortalX.exe
       - name: Build PortalX
