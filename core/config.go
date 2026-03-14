@@ -1,9 +1,14 @@
 package core
 
+type RouteRule struct {
+	Type string
+	Tag  string
+}
+
 type Profile struct {
-	Name    string
-	Type    string
-	Route   string
+	Name     string
+	Type     string
+	Route    []RouteRule
 	Outbound Outbound
 }
 
@@ -18,8 +23,8 @@ type Outbound struct {
 	Password   string
 }
 
-func GenerateConfig(p Profile) error {
+func GenerateConfig(p *Profile) error {
 
-	// позже здесь будет генерация sing-box config
+	// позже здесь будет генерация конфигурации sing-box
 	return nil
 }
