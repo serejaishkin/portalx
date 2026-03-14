@@ -1,22 +1,25 @@
 package core
 
 type Profile struct {
-	Name     string
-	Type     string
-	Server   string
-	Port     int
-	UUID     string
-	Password string
+	Name    string
+	Type    string
+	Route   string
+	Outbound Outbound
 }
 
 type Outbound struct {
-	Type   string
-	Server string
-	Port   int
+	Type       string
+	Tag        string
+	Server     string
+	Port       int
+	UUID       string
+	PrivateKey string
+	PublicKey  string
+	Password   string
 }
 
 func GenerateConfig(p Profile) error {
 
-	// здесь позже будем генерировать sing-box config
+	// позже здесь будет генерация sing-box config
 	return nil
 }
