@@ -1,5 +1,127 @@
+package main
+
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+)
+
+var vpnCmd *exec.Cmd
+
+func createConfig(link string) error {
+
+	config := `{
+"log": { "level": "info" },
+"inbounds": [
 {
-  "log": {
-    "level": "info"
-  }
+"type": "tun",
+"tag": "tun-in",
+"interface_name": "portalx",
+"inet4_address": "172.19.0.1/30",
+"auto_route": true
+}
+],
+"outbounds": [
+{
+"type": "vless",
+"tag": "proxy",
+"server": "example.com",
+"server_port": 443,
+"uuid": "11111111-1111-1111-1111-111111111111"
+}
+]
+}`
+
+	return os.WriteFile("config.json", []byte(config), 0644)
+}
+
+func startVPN(status *widget.Label) {
+
+	if vpnCmd != nil {
+		status.SetText("Статус: уже подключено")
+		return
+	}
+
+	singbox := filepath.Join("bin", "sing-box.exe")
+
+	vpnCmd = exec.Command(singbox, "run", "-c", "config.json")
+
+	err := vpnCmd.Start()
+
+	if err != nil {
+		status.SetText("Ошибка запуска")
+		vpnCmd = nil
+		return
+	}
+
+	status.SetText("Статус: подключено")
+}
+
+func stopVPN(status *widget.Label) {
+
+	if vpnCmd == nil {
+		status.SetText("Статус: не запущено")
+		return
+	}
+
+	vpnCmd.Process.Kill()
+	vpnCmd = nil
+
+	status.SetText("Статус: отключено")
+}
+
+func main() {
+
+	a := app.New()
+	w := a.NewWindow("PortalX")
+
+	linkInput := widget.NewEntry()
+	linkInput.SetPlaceHolder("Вставьте VLESS ссылку")
+
+	status := widget.NewLabel("Статус: отключено")
+
+	importBtn := widget.NewButton("Импорт", func() {
+
+		link := linkInput.Text
+
+		if link == "" {
+			status.SetText("Вставьте ссылку")
+			return
+		}
+
+		err := createConfig(link)
+
+		if err != nil {
+			status.SetText("Ошибка создания конфига")
+			return
+		}
+
+		status.SetText("config.json создан")
+	})
+
+	connectBtn := widget.NewButton("Подключиться", func() {
+		startVPN(status)
+	})
+
+	disconnectBtn := widget.NewButton("Отключиться", func() {
+		stopVPN(status)
+	})
+
+	content := container.NewVBox(
+		widget.NewLabel("PortalX VPN"),
+		linkInput,
+		importBtn,
+		connectBtn,
+		disconnectBtn,
+		status,
+	)
+
+	w.SetContent(content)
+	w.Resize(fyne.NewSize(420, 300))
+	w.ShowAndRun()
 }
