@@ -10,20 +10,40 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      # 1️⃣ Клонируем репозиторий
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Настройка Go 1.21
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
 
-      - name: Download Go dependencies
-        run: go mod tidy
+      # 3️⃣ Устанавливаем зависимости (fyne и все нужные)
+      - name: Initialize and Update Go Modules
+        run: |
+          if (-Not (Test-Path go.mod)) { go mod init portalx }
+          go get fyne.io/fyne/v2@latest
+          go mod tidy
 
+      # 4️⃣ Создаем папку bin, если её нет
+      - name: Create bin folder
+        run: |
+          mkdir bin -ErrorAction SilentlyContinue
+
+      # 5️⃣ Копируем необходимые бинарники в bin
+      - name: Copy required binaries
+        run: |
+          Copy-Item -Path "bin\sing-box.exe" -Destination "bin\sing-box.exe" -Force
+          Copy-Item -Path "bin\WinDivert64.sys" -Destination "bin\WinDivert64.sys" -Force
+          Copy-Item -Path "bin\windivertctl.exe" -Destination "bin\windivertctl.exe" -Force
+
+      # 6️⃣ Собираем основной exe
       - name: Build PortalX
         run: go build -o portalx.exe main.go
 
+      # 7️⃣ Загружаем артефакт
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
