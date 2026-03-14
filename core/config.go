@@ -24,7 +24,5 @@ type Outbound struct {
 }
 
 func GenerateConfig(p *Profile) error {
-
-	// позже здесь будет генерация конфигурации sing-box
 	return nil
 }
