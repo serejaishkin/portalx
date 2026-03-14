@@ -1,32 +1,68 @@
-name: build
+name: Build PortalX GUI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-
-  build:
-
+  build-windows:
     runs-on: windows-latest
 
     steps:
-
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: 1.21
 
-      - name: Install dependencies
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            C:\Users\runneradmin\go\pkg\mod
+            C:\Users\runneradmin\AppData\Local\go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Initialize Go module
+        shell: pwsh
+        run: |
+          if (-Not (Test-Path go.mod)) {
+            go mod init portalx
+          }
+
+      - name: Tidy Go modules
+        shell: pwsh
         run: go mod tidy
 
-      - name: Build
-        run: go build -o portalx.exe
+      - name: Build PortalX GUI
+        shell: pwsh
+        run: |
+          # Создаем папку bin, если её нет
+          mkdir bin -ErrorAction SilentlyContinue
+          # Собираем GUI
+          go build -o portalx.exe main.go
 
-      - name: Upload
+      - name: Copy dependencies to bin
+        shell: pwsh
+        run: |
+          Copy-Item .\WinDivert64.sys .\bin\WinDivert64.sys -Force
+          Copy-Item .\windivertctl.exe .\bin\windivertctl.exe -Force
+          Copy-Item .\sing-box.exe .\bin\sing-box.exe -Force
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: portalx
-          path: portalx.exe
+          path: |
+            portalx.exe
+            bin
+          retention-days: 7
+          if-no-files-found: warn
