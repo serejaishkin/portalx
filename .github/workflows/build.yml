@@ -21,13 +21,13 @@ jobs:
           go-version: '1.21'
 
       # 3️⃣ Создаём папку bin и копируем бинарники Windows
-      - name: Copy bin files
-        shell: powershell
-        run: |
-          mkdir bin -ErrorAction SilentlyContinue
-          copy bin\sing-box.exe bin\sing-box.exe
-          copy bin\WinDivert64.sys bin\WinDivert64.sys
-          copy bin\windivertctl.exe bin\windivertctl.exe
+    - name: Copy bin files
+  shell: powershell
+  run: |
+    mkdir bin -ErrorAction SilentlyContinue
+    copy bin\sing-box.exe bin\sing-box.exe -Force
+    copy bin\WinDivert64.sys bin\WinDivert64.sys -Force
+    copy bin\windivertctl.exe bin\windivertctl.exe -Force
 
       # 4️⃣ Сборка PortalX.exe через Go
       - name: Build PortalX
